@@ -1,0 +1,52 @@
+# ── Secrets / Credentials ─────────────────────────────────────────────────────
+.env
+*.key
+*.pem
+
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# ── Virtual Environments ──────────────────────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+
+# ── Cache & Data ──────────────────────────────────────────────────────────────
+cache/
+# Keep the cache directory tracked but ignore its contents
+!cache/.gitkeep
+
+# Output data (exclude generated output but keep input)
+data/output.json
+data/output.csv
+
+# ── Testing ───────────────────────────────────────────────────────────────────
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# ── IDE ───────────────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── Playwright ────────────────────────────────────────────────────────────────
+# Playwright browser binaries are large; install with: playwright install chromium
+# They live in the system/user directory, not the project root.
+
+# ── Logs ─────────────────────────────────────────────────────────────────────
+*.log
+logs/
