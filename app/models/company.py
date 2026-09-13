@@ -167,10 +167,16 @@ class CompanyEnrichment(BaseModel):
         result: list[str] = []
         for email in v:
             normalised = str(email).strip().lower()
-            if normalised and normalised not in seen:
+            if (
+                normalised
+                and "@" in normalised
+                and "." in normalised.split("@")[-1]
+                and normalised not in seen
+            ):
                 seen.add(normalised)
                 result.append(normalised)
         return result
+
 
     @field_validator("confidence_score", mode="before")
     @classmethod
