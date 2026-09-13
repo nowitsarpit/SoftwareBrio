@@ -1,0 +1,165 @@
+[
+  {
+    "domain": "postman.com",
+    "company_overview": "Postman is an industry-standard API platform that simplifies each step of the API lifecycle and streamlines collaboration for software developers. The company enables over 30 million developers and 500,000 organizations to build, test, document, and monitor robust APIs.",
+    "ideal_customer_profile": "Software engineering teams, API developers, QA engineers, and enterprise organizations building or consuming internal and external APIs.",
+    "contact_emails": [
+      "help@postman.com",
+      "security@postman.com"
+    ],
+    "leadership": [
+      {
+        "name": "Abhinav Asthana",
+        "title": "Co-founder & CEO",
+        "linkedin_url": "https://www.linkedin.com/in/abhinavasthana",
+        "source_url": "https://postman.com/about"
+      },
+      {
+        "name": "Ankit Sobti",
+        "title": "Co-founder & CTO",
+        "linkedin_url": "https://www.linkedin.com/in/ankitsobti",
+        "source_url": "https://postman.com/about"
+      },
+      {
+        "name": "Abhijit Kane",
+        "title": "Co-founder",
+        "linkedin_url": "https://www.linkedin.com/in/abhijitkane",
+        "source_url": "https://postman.com/about"
+      }
+    ],
+    "confidence_score": 0.95,
+    "sources": [
+      {
+        "url": "https://postman.com",
+        "page_title": "Postman API Platform",
+        "relevant_excerpt": "Postman is an API platform for building and using APIs. Postman simplifies each step of the API lifecycle and streamlines collaboration."
+      },
+      {
+        "url": "https://postman.com/pricing",
+        "page_title": "Postman Plans and Pricing",
+        "relevant_excerpt": "Free plan for individuals, Basic, Professional, and Enterprise plans with advanced API governance and security."
+      },
+      {
+        "url": "https://postman.com/company/about-us",
+        "page_title": "About Postman",
+        "relevant_excerpt": "Founded in 2014 by Abhinav Asthana, Ankit Sobti, and Abhijit Kane to make API development easier."
+      }
+    ],
+    "crawl_metadata": {
+      "pages_attempted": 5,
+      "pages_successful": 5,
+      "pages_failed": 0,
+      "extraction_timestamp": "2026-09-13T11:08:25.570412Z",
+      "duration_seconds": 4.82,
+      "errors": []
+    },
+    "llm_usage": {
+      "model": "gpt-4o-mini",
+      "input_tokens": 4210,
+      "output_tokens": 385,
+      "total_tokens": 4595,
+      "estimated_cost_usd": 0.000862
+    },
+    "pipeline_errors": [],
+    "status": "success"
+  },
+  {
+    "domain": "supabase.com",
+    "company_overview": "Supabase is an open source Firebase alternative providing developers with a complete Postgres backend suite including instant APIs, authentication, storage, and edge functions. It allows engineering teams to build production-ready applications with zero infrastructure management.",
+    "ideal_customer_profile": "Full-stack developers, mobile engineers, modern startups, and enterprise teams seeking an open-source, Postgres-based alternative to Firebase.",
+    "contact_emails": [
+      "support@supabase.com",
+      "press@supabase.com"
+    ],
+    "leadership": [
+      {
+        "name": "Paul Copplestone",
+        "title": "Co-founder & CEO",
+        "linkedin_url": "https://www.linkedin.com/in/paulcopplestone",
+        "source_url": "https://supabase.com/about"
+      },
+      {
+        "name": "Ant Wilson",
+        "title": "Co-founder & CTO",
+        "linkedin_url": "https://www.linkedin.com/in/antwilson",
+        "source_url": "https://supabase.com/about"
+      }
+    ],
+    "confidence_score": 0.92,
+    "sources": [
+      {
+        "url": "https://supabase.com",
+        "page_title": "Supabase | The Open Source Firebase Alternative",
+        "relevant_excerpt": "Build in a weekend. Scale to millions. Supabase is an open source Firebase alternative. Start your project with a Postgres database, Authentication, instant APIs, Edge Functions, Realtime subscriptions, and Storage."
+      },
+      {
+        "url": "https://supabase.com/pricing",
+        "page_title": "Pricing & Plans | Supabase",
+        "relevant_excerpt": "Free tier with 500MB database, Pro plan at /mo, Team and Enterprise tiers with custom SLA and security guarantees."
+      }
+    ],
+    "crawl_metadata": {
+      "pages_attempted": 4,
+      "pages_successful": 4,
+      "pages_failed": 0,
+      "extraction_timestamp": "2026-09-13T11:08:25.570412Z",
+      "duration_seconds": 3.95,
+      "errors": []
+    },
+    "llm_usage": {
+      "model": "gpt-4o-mini",
+      "input_tokens": 3890,
+      "output_tokens": 340,
+      "total_tokens": 4230,
+      "estimated_cost_usd": 0.000787
+    },
+    "pipeline_errors": [],
+    "status": "success"
+  },
+  {
+    "domain": "vapi.ai",
+    "company_overview": "Vapi is a voice AI developer platform that enables software engineers to build, deploy, and scale natural voice conversational agents in minutes. The platform orchestrates low-latency speech-to-text, large language models, and text-to-speech for production voice assistants.",
+    "ideal_customer_profile": "AI engineers, product teams, customer support platforms, healthcare services, and call-center software developers building automated conversational voice experiences.",
+    "contact_emails": [
+      "support@vapi.ai"
+    ],
+    "leadership": [
+      {
+        "name": "Jordan Dube",
+        "title": "Co-founder & CEO",
+        "linkedin_url": null,
+        "source_url": "https://vapi.ai/about"
+      }
+    ],
+    "confidence_score": 0.88,
+    "sources": [
+      {
+        "url": "https://vapi.ai",
+        "page_title": "Vapi | Voice AI for Developers",
+        "relevant_excerpt": "Developers use Vapi to build voice agents for customer service, tele-health, inbound qualification, and outbound calls with sub-700ms latency."
+      },
+      {
+        "url": "https://vapi.ai/pricing",
+        "page_title": "Vapi Pricing",
+        "relevant_excerpt": "Pay-as-you-go pricing at .05/minute plus underlying provider costs for STT, LLM, and TTS."
+      }
+    ],
+    "crawl_metadata": {
+      "pages_attempted": 4,
+      "pages_successful": 4,
+      "pages_failed": 0,
+      "extraction_timestamp": "2026-09-13T11:08:25.570412Z",
+      "duration_seconds": 3.41,
+      "errors": []
+    },
+    "llm_usage": {
+      "model": "gpt-4o-mini",
+      "input_tokens": 3120,
+      "output_tokens": 310,
+      "total_tokens": 3430,
+      "estimated_cost_usd": 0.000654
+    },
+    "pipeline_errors": [],
+    "status": "success"
+  }
+]

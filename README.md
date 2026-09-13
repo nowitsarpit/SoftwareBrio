@@ -123,97 +123,69 @@ graph TB
 classDiagram
     direction TB
 
-    class CompanyIntelligence {
-        +str company_name
+    class CompanyEnrichment {
         +str domain
-        +str website_url
-        +str summary
-        +str what_they_do
-        +str category
-        +List~str~ tags
-        +List~str~ target_audience
-        +List~str~ value_propositions
-        +List~str~ products_services
-        +str pricing_model
-        +FundingInfo funding
-        +FoundingInfo founding
-        +List~KeyPerson~ key_people
-        +ContactInfo contacts
-        +LeadScore lead_scoring
-        +List~PageEvidence~ evidence_pages
+        +str company_overview
+        +str ideal_customer_profile
+        +List~str~ contact_emails
+        +List~LeadershipMember~ leadership
         +float confidence_score
-        +str extraction_timestamp
-        +dict to_clean_dict()
+        +List~SourceEvidence~ sources
+        +CrawlMetadata crawl_metadata
+        +LLMUsage llm_usage
+        +List~str~ pipeline_errors
+        +str status
+        +deduplicate_emails() List~str~
+        +clamp_confidence() float
     }
 
-    class FundingInfo {
-        +str stage
-        +str total_raised
-        +str last_round_date
-        +List~str~ known_investors
-        +str source_evidence
-    }
-
-    class FoundingInfo {
-        +int year
-        +List~str~ founders
-        +str headquarters
-    }
-
-    class KeyPerson {
+    class LeadershipMember {
         +str name
         +str title
         +str linkedin_url
+        +str source_url
+        +validate_linkedin_url() str
     }
 
-    class ContactInfo {
-        +List~str~ emails
-        +List~str~ phone_numbers
-        +dict social_links
-    }
-
-    class LeadScore {
-        +int score
-        +str grade
-        +List~str~ positive_signals
-        +List~str~ risk_signals
-        +str reasoning
-    }
-
-    class PageEvidence {
+    class SourceEvidence {
         +str url
-        +str page_type
-        +str retrieved_at
-        +int content_length
+        +str page_title
+        +str relevant_excerpt
+        +truncate_excerpt() str
     }
 
-    class RawPageBundle {
-        +str domain
-        +str homepage_url
-        +List~CrawledPage~ pages
-        +List~str~ discovered_emails
-        +List~str~ discovered_phones
-        +dict social_links
-        +int total_text_length
-        +str combined_evidence()
+    class CrawlMetadata {
+        +int pages_attempted
+        +int pages_successful
+        +int pages_failed
+        +datetime extraction_timestamp
+        +float duration_seconds
+        +List~str~ errors
     }
 
-    class EnrichmentPipeline {
+    class LLMUsage {
+        +str model
+        +int input_tokens
+        +int output_tokens
+        +int total_tokens
+        +float estimated_cost_usd
+    }
+
+    class DomainEnrichmentPipeline {
         -Settings settings
         -Crawler crawler
         -LLMExtractor extractor
-        -PerplexitySearchEngine search_engine
-        -ConfidenceScorer scorer
-        +enrich_domain(domain: str) CompanyIntelligence
-        +enrich_all(domains: List~str~) List~CompanyIntelligence~
-        -_fallback_search(domain: str, raw_bundle: RawPageBundle) str
+        -SearchProvider search_provider
+        -PageCache cache
+        +enrich_domain(domain: str) CompanyEnrichment
+        +enrich_batch(domains: List~str~) List~CompanyEnrichment~
     }
 
     class Crawler {
         -Settings settings
         -PlaywrightBrowserManager browser_mgr
-        -DiskCache cache
-        +crawl_domain(domain: str) RawPageBundle
+        -PageCache cache
+        +crawl_domain(domain: str) CrawlResult
         +fetch_page(url: str, use_browser: bool) str
         -_fetch_http(url: str) str
         -_fetch_browser(url: str) str
@@ -221,28 +193,22 @@ classDiagram
 
     class LLMExtractor {
         -Settings settings
-        -OpenAI client
-        +extract(domain: str, evidence: str) CompanyIntelligence
-        -_repair_json(raw_text: str, err: Exception) CompanyIntelligence
+        -AsyncOpenAI client
+        +extract(domain: str, evidence: str) CompanyEnrichment
+        -_call_llm_structured() dict
+        -_repair_json(raw_text: str, err: Exception) CompanyEnrichment
     }
 
-    class ConfidenceScorer {
-        +calculate(data: CompanyIntelligence, evidence: RawPageBundle) float
-    }
+    CompanyEnrichment "1" *-- "*" LeadershipMember
+    CompanyEnrichment "1" *-- "*" SourceEvidence
+    CompanyEnrichment "1" *-- "1" CrawlMetadata
+    CompanyEnrichment "1" *-- "0..1" LLMUsage
 
-    CompanyIntelligence "1" *-- "1" FundingInfo
-    CompanyIntelligence "1" *-- "1" FoundingInfo
-    CompanyIntelligence "1" *-- "*" KeyPerson
-    CompanyIntelligence "1" *-- "1" ContactInfo
-    CompanyIntelligence "1" *-- "1" LeadScore
-    CompanyIntelligence "1" *-- "*" PageEvidence
-
-    EnrichmentPipeline ..> RawPageBundle : creates & transforms
-    EnrichmentPipeline ..> CompanyIntelligence : produces
-    EnrichmentPipeline --> Crawler : orchestrates
-    EnrichmentPipeline --> LLMExtractor : invokes
-    EnrichmentPipeline --> ConfidenceScorer : calculates score
+    DomainEnrichmentPipeline ..> CompanyEnrichment : creates & returns
+    DomainEnrichmentPipeline --> Crawler : coordinates
+    DomainEnrichmentPipeline --> LLMExtractor : delegates extraction
 ```
+
 
 ---
 
@@ -621,16 +587,16 @@ python -m app.main --domain postman.com
 ```
 
 ### Available CLI Flags
+### Available CLI Flags
 | Flag | Description | Default |
 |---|---|---|
-| `--input`, `-i` | Path to JSON input file containing domain list | `data/input.json` |
-| `--output`, `-o` | Destination path for output JSON/CSV | `data/output.json` |
-| `--domain`, `-d` | Process a single domain directly from the command line | `None` |
-| `--format`, `-f` | Output format: `json`, `csv`, or `both` | `both` |
-| `--concurrency`, `-c` | Number of concurrent domains to enrich | `1` |
-| `--no-cache` | Bypass local disk cache and force live crawling | `False` |
-| `--model`, `-m` | Override OpenAI model (`gpt-4o-mini`, `gpt-4o`) | `gpt-4o-mini` |
-| `--verbose`, `-v` | Enable detailed debug logging | `False` |
+| `--input`, `-i` | Path to JSON input file containing `{"domains": [...]}` or `[...]` | `data/input.json` |
+| `--domains` | Pass one or more company domains directly on the CLI | `None` |
+| `--output` | Destination path for output file | `data/output.json` |
+| `--output-format` | Output format: `json` or `csv` | `json` |
+| `--max-pages` | Max pages to crawl per domain (bounded budget) | `8` |
+| `--no-cache` | Disable local disk cache for this run | `False` |
+| `--log-level` | Logging verbosity: `DEBUG`, `INFO`, `WARNING`, `ERROR` | `INFO` |
 
 ---
 
@@ -638,83 +604,82 @@ python -m app.main --domain postman.com
 
 ### Input Format (`data/input.json`)
 ```json
-[
-  "postman.com",
-  "supabase.com",
-  "vapi.ai"
-]
+{
+  "domains": [
+    "postman.com",
+    "supabase.com",
+    "vapi.ai"
+  ]
+}
 ```
+*(Also supports plain array: `["postman.com", "supabase.com", "vapi.ai"]`)*
 
 ### Output Format Sample (`data/output.json`)
 ```json
 [
   {
-    "company_name": "Supabase",
-    "domain": "supabase.com",
-    "website_url": "https://supabase.com",
-    "summary": "Supabase is an open source Firebase alternative providing a Postgres database, authentication, instant APIs, edge functions, and real-time subscriptions.",
-    "what_they_do": "Builds scalable backend infrastructure tools centered around Postgres for software developers and enterprise teams.",
-    "category": "Developer Tools & Cloud Infrastructure",
-    "tags": ["Postgres", "Database", "Authentication", "Open Source", "Serverless"],
-    "target_audience": ["Full-Stack Developers", "Software Engineers", "Startups", "Enterprise Engineering Teams"],
-    "value_propositions": [
-      "Dedicated PostgreSQL database without manual configuration",
-      "Auto-generated instant REST and GraphQL APIs",
-      "Built-in user authentication with Row-Level Security"
+    "domain": "postman.com",
+    "company_overview": "Postman is an industry-standard API platform that simplifies each step of the API lifecycle and streamlines collaboration for software developers. The company enables over 30 million developers and 500,000 organizations to build, test, document, and monitor robust APIs.",
+    "ideal_customer_profile": "Software engineering teams, API developers, QA engineers, and enterprise organizations building or consuming internal and external APIs.",
+    "contact_emails": [
+      "help@postman.com",
+      "security@postman.com"
     ],
-    "products_services": ["Postgres Database", "Auth", "Storage", "Edge Functions", "Realtime"],
-    "pricing_model": "Freemium with Usage-Based and Enterprise Tiers",
-    "funding": {
-      "stage": "Series B",
-      "total_raised": "$116M",
-      "last_round_date": "2022",
-      "known_investors": ["Y Combinator", "Coatue", "Felicis Ventures"],
-      "source_evidence": "Extracted from verified company press and about pages."
-    },
-    "founding": {
-      "year": 2020,
-      "founders": ["Paul Copplestone", "Ant Wilson"],
-      "headquarters": "Singapore / Remote"
-    },
-    "key_people": [
+    "leadership": [
       {
-        "name": "Paul Copplestone",
+        "name": "Abhinav Asthana",
         "title": "Co-founder & CEO",
-        "linkedin_url": "https://linkedin.com/in/paulcopplestone"
-      }
-    ],
-    "contacts": {
-      "emails": ["support@supabase.com", "press@supabase.com"],
-      "phone_numbers": [],
-      "social_links": {
-        "twitter": "https://twitter.com/supabase",
-        "github": "https://github.com/supabase",
-        "linkedin": "https://linkedin.com/company/supabase"
-      }
-    },
-    "lead_scoring": {
-      "score": 92,
-      "grade": "A",
-      "positive_signals": ["Clear pricing tiers", "High technical audience match", "Active hiring and enterprise plan"],
-      "risk_signals": [],
-      "reasoning": "High value B2B developer tool with self-serve model and transparent pricing."
-    },
-    "evidence_pages": [
-      {
-        "url": "https://supabase.com",
-        "page_type": "homepage",
-        "retrieved_at": "2026-09-13T10:30:00Z",
-        "content_length": 14200
+        "linkedin_url": "https://www.linkedin.com/in/abhinavasthana",
+        "source_url": "https://postman.com/about"
       },
       {
-        "url": "https://supabase.com/pricing",
-        "page_type": "pricing",
-        "retrieved_at": "2026-09-13T10:30:03Z",
-        "content_length": 8900
+        "name": "Ankit Sobti",
+        "title": "Co-founder & CTO",
+        "linkedin_url": "https://www.linkedin.com/in/ankitsobti",
+        "source_url": "https://postman.com/about"
+      },
+      {
+        "name": "Abhijit Kane",
+        "title": "Co-founder",
+        "linkedin_url": "https://www.linkedin.com/in/abhijitkane",
+        "source_url": "https://postman.com/about"
       }
     ],
-    "confidence_score": 0.94,
-    "extraction_timestamp": "2026-09-13T10:30:08Z"
+    "confidence_score": 0.95,
+    "sources": [
+      {
+        "url": "https://postman.com",
+        "page_title": "Postman API Platform",
+        "relevant_excerpt": "Postman is an API platform for building and using APIs. Postman simplifies each step of the API lifecycle and streamlines collaboration."
+      },
+      {
+        "url": "https://postman.com/pricing",
+        "page_title": "Postman Plans and Pricing",
+        "relevant_excerpt": "Free plan for individuals, Basic, Professional, and Enterprise plans with advanced API governance and security."
+      },
+      {
+        "url": "https://postman.com/company/about-us",
+        "page_title": "About Postman",
+        "relevant_excerpt": "Founded in 2014 by Abhinav Asthana, Ankit Sobti, and Abhijit Kane to make API development easier."
+      }
+    ],
+    "crawl_metadata": {
+      "pages_attempted": 5,
+      "pages_successful": 5,
+      "pages_failed": 0,
+      "extraction_timestamp": "2026-09-13T11:08:25.570412Z",
+      "duration_seconds": 4.82,
+      "errors": []
+    },
+    "llm_usage": {
+      "model": "gpt-4o-mini",
+      "input_tokens": 4210,
+      "output_tokens": 385,
+      "total_tokens": 4595,
+      "estimated_cost_usd": 0.000862
+    },
+    "pipeline_errors": [],
+    "status": "success"
   }
 ]
 ```
@@ -803,3 +768,52 @@ To ensure responsible, legal, and ethical interaction with target websites:
 4. **No External Traversal**: Restricts crawling strictly to the target company's primary domain and subdomains.
 5. **No JavaScript Execution of Scraped Payloads**: Safely sanitizes all scraped text and disables script execution.
 6. **Local Disk Caching**: Caches raw HTTP/browser responses using SHA-256 keys to avoid redundant bandwidth consumption.
+
+---
+
+## 12. Submission Guide & Screening Checklist (SoftwareBrio)
+
+### Submission Deliverables Checklist
+- [x] **GitHub Repository Link**: Public git repo containing clean modular Python code (`https://github.com/nowitsarpit/SoftwareBrio`).
+- [x] **Dependency Specification**: `pyproject.toml` and `requirements.txt` with pinned dependencies.
+- [x] **Documentation**: Consolidated `README.md` explaining environment configuration, UML architecture, and local run.
+- [x] **Sample Output Files**: Committed [`data/output.json`](data/output.json) and [`data/output.csv`](data/output.csv) for `postman.com`, `supabase.com`, and `vapi.ai`.
+- [x] **Loom Walkthrough Script**: Structured 2–3 minute video presentation script included in [Section 10](#10-loom-demo-script-23-minute-guide).
+- [x] **Mandatory Screening Question**: Explicitly confirmed below.
+
+---
+
+### Email Submission Template
+
+**Send To**: `support@softwarebrio.com`  
+**Subject**: `[AI Intern Submission] - Arpit` *(replace with your full name)*  
+
+```
+Hi SoftwareBrio Hiring Team,
+
+Please find my submission for the AI Engineer Intern take-home assignment below:
+
+1. GitHub Repository:
+   https://github.com/nowitsarpit/SoftwareBrio
+
+2. Sample Output Files:
+   - data/output.json (enclosed in repo)
+   - data/output.csv (enclosed in repo)
+
+3. Loom Video Walkthrough (2-3 mins):
+   [Insert your Loom recording link here]
+
+4. LinkedIn Profile:
+   [Insert your LinkedIn profile URL here]
+
+5. Mandatory Screening Question:
+   "Are you 100% comfortable spending roughly 40% of your working hours on manual lead prospecting, email discovery, and account handling alongside your AI engineering tasks? (Yes / No)"
+   
+   Answer: Yes, 100% comfortable. I appreciate the hybrid execution-and-building nature of the role and look forward to automating prospecting workflows based on direct hands-on operational experience.
+
+Thank you for your consideration!
+
+Best regards,
+[Your Name]
+(+91) - [Your Phone Number]
+```

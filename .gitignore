@@ -25,9 +25,7 @@ cache/
 # Keep the cache directory tracked but ignore its contents
 !cache/.gitkeep
 
-# Output data (exclude generated output but keep input)
-data/output.json
-data/output.csv
+# Output data (data/output.json tracked as assignment sample deliverable)
 
 # ── Testing ───────────────────────────────────────────────────────────────────
 .pytest_cache/

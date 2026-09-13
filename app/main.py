@@ -124,12 +124,18 @@ def _load_domains(args: argparse.Namespace) -> list[str]:
         logger.error("Invalid JSON in %s: %s", input_path, exc)
         sys.exit(1)
 
-    domains = data.get("domains", [])
+    if isinstance(data, list):
+        domains = data
+    elif isinstance(data, dict):
+        domains = data.get("domains", [])
+    else:
+        domains = []
+
     if not domains:
         logger.error("No domains found in %s", input_path)
         sys.exit(1)
 
-    return [str(d) for d in domains]
+    return [str(d).strip() for d in domains if str(d).strip()]
 
 
 # ---------------------------------------------------------------------------
