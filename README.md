@@ -11,7 +11,7 @@
 ## Table of Contents
 
 - [Project Overview](#project-overview)
-- [Architecture](#architecture)
+- [Architecture & UML Diagrams](#architecture--uml-diagrams)
 - [Features](#features)
 - [Setup](#setup)
 - [Usage](#usage)
@@ -21,6 +21,7 @@
 - [Limitations](#limitations)
 - [Future Improvements](#future-improvements)
 - [Responsible Crawling](#responsible-crawling)
+- [Full UML Diagrams Specification (docs/UML_DIAGRAMS.md)](docs/UML_DIAGRAMS.md)
 
 ---
 
@@ -40,7 +41,9 @@ The output includes:
 
 ---
 
-## Architecture
+## Architecture & UML Diagrams
+ 
+> 📘 **Full UML Specification**: For the complete suite of UML models (Component, Class, Sequence, Activity, State Machine, and Deployment diagrams), see [docs/UML_DIAGRAMS.md](docs/UML_DIAGRAMS.md).
 
 ```mermaid
 flowchart TD
