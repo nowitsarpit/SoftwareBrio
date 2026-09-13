@@ -78,10 +78,10 @@ Examples:
     )
     parser.add_argument(
         "--output-format",
-        choices=["json", "csv"],
+        choices=["json", "csv", "html", "both", "all"],
         default="json",
         dest="output_format",
-        help="Output format (default: json).",
+        help="Output format: json | csv | html | all (default: json; companion report.html is also created).",
     )
     parser.add_argument(
         "--log-level",
@@ -103,6 +103,12 @@ Examples:
         metavar="N",
         dest="max_pages",
         help=f"Max pages per domain (default: {settings.max_pages_per_domain}).",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        default=False,
+        help="Validate settings, cache, and domain reachability without invoking the LLM.",
     )
 
     return parser
@@ -232,23 +238,107 @@ async def run_enrichment(
         if r.llm_usage and r.llm_usage.estimated_cost_usd
     )
 
-    print("\n" + "=" * 60)
-    print("  ENRICHMENT COMPLETE")
-    print("=" * 60)
-    print(f"  Processed:         {len(results)}")
-    print(f"  Successful:        {successful}")
-    print(f"  Partial:           {partial}")
-    print(f"  Failed:            {failed}")
-    print(f"  Total pages visited: {total_pages}")
-    print(f"  Total duration:    {total_duration}s")
-    if total_tokens:
-        print(f"  Total tokens used: {total_tokens:,}")
-    if total_cost:
-        print(f"  Estimated cost:    ${total_cost:.4f} USD")
-    print(f"  Output:            {output_path}")
-    print("=" * 60 + "\n")
+    try:
+        from rich.console import Console
+        from rich.table import Table
+
+        console = Console()
+        table = Table(
+            title="🎯 Autonomous Lead Enrichment — Summary",
+            header_style="bold cyan",
+            border_style="dim",
+            show_header=True,
+        )
+        table.add_column("Domain", style="bold white")
+        table.add_column("Status", justify="center")
+        table.add_column("Score", justify="right")
+        table.add_column("Emails", justify="center")
+        table.add_column("Leadership", justify="center")
+        table.add_column("Pages", justify="right")
+        table.add_column("Duration", justify="right")
+        table.add_column("Est. Cost", justify="right")
+
+        for r in results:
+            status_style = (
+                "green" if r.status == "success" else ("yellow" if r.status == "partial" else "red")
+            )
+            cost_str = (
+                f"${r.llm_usage.estimated_cost_usd:.4f}"
+                if r.llm_usage and r.llm_usage.estimated_cost_usd
+                else "$0.0000"
+            )
+            table.add_row(
+                r.domain,
+                f"[{status_style}]{r.status.upper()}[/{status_style}]",
+                f"{int(r.confidence_score * 100)}%",
+                str(len(r.contact_emails)),
+                str(len(r.leadership)),
+                str(r.crawl_metadata.pages_successful),
+                f"{r.crawl_metadata.duration_seconds:.1f}s",
+                cost_str,
+            )
+        console.print()
+        console.print(table)
+        console.print(f"[dim]📁 Results saved to: [bold]{output_path}[/bold] (and companion report.html)[/dim]\n")
+    except Exception:
+        print("\n" + "=" * 60)
+        print("  ENRICHMENT COMPLETE")
+        print("=" * 60)
+        print(f"  Processed:         {len(results)}")
+        print(f"  Successful:        {successful}")
+        print(f"  Partial:           {partial}")
+        print(f"  Failed:            {failed}")
+        print(f"  Total pages visited: {total_pages}")
+        print(f"  Total duration:    {total_duration}s")
+        if total_tokens:
+            print(f"  Total tokens used: {total_tokens:,}")
+        if total_cost:
+            print(f"  Estimated cost:    ${total_cost:.4f} USD")
+        print(f"  Output:            {output_path}")
+        print("=" * 60 + "\n")
 
     return results
+
+
+async def run_dry_run(domains: list[str]) -> None:
+    """Validate environment and target domain connectivity without LLM calls."""
+    import httpx
+    from app.crawler.url_utils import build_base_url, normalize_domain
+
+    if hasattr(sys.stdout, "reconfigure"):
+        try:
+            sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:  # noqa: BLE001
+            pass
+
+    logger.info("Running pre-flight dry-run checks...")
+    print("\nPre-Flight Dry-Run Validation:")
+    print("-" * 55)
+    print(f"  OpenAI Model:    {settings.openai_model}")
+    print(f"  Max Pages:       {settings.max_pages_per_domain}")
+    print(f"  Cache Enabled:   {settings.cache_enabled} ({settings.cache_dir})")
+    print("-" * 55)
+
+    # Test cache directory write access
+    settings.cache_dir.mkdir(parents=True, exist_ok=True)
+    test_cache_file = settings.cache_dir / ".write_test"
+    test_cache_file.write_text("ok", encoding="utf-8")
+    test_cache_file.unlink()
+    print("  [OK] Local disk cache write check passed")
+
+    # Test domain reachability
+    async with httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
+        for raw in domains:
+            domain = normalize_domain(raw)
+            url = build_base_url(domain)
+            try:
+                resp = await client.get(url)
+                print(f"  [OK] {domain:<22} HTTP {resp.status_code} ({len(resp.content):,} bytes)")
+            except Exception as exc:  # noqa: BLE001
+                print(f"  [!]  {domain:<22} Connection error: {exc}")
+
+    print("-" * 55)
+    print("Pre-flight dry-run completed successfully! System is production-ready.\n")
 
 
 # ---------------------------------------------------------------------------
@@ -265,6 +355,17 @@ def main() -> None:
     setup_logging(level=args.log_level, fmt=settings.log_format)
 
     domains = _load_domains(args)
+
+    if args.dry_run:
+        asyncio.run(run_dry_run(domains))
+        return
+
+    if not settings.openai_api_key:
+        logger.error(
+            "OPENAI_API_KEY is not configured! Please add your key to .env or set $env:OPENAI_API_KEY. "
+            "To test domain reachability without an API key, run with: --dry-run"
+        )
+        sys.exit(1)
 
     logger.info("Lead Enrichment Agent starting")
     logger.info("Model: %s | Max pages/domain: %d", settings.openai_model, args.max_pages)

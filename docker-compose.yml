@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  lead-enrichment:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lead-enrichment-pipeline
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./cache:/app/cache
+      - ./logs:/app/logs
+    command: ["--input", "data/input.json", "--output", "data/output.json", "--output-format", "all"]
+    restart: "no"

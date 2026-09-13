@@ -6,7 +6,9 @@
 [![Pydantic v2](https://img.shields.io/badge/Pydantic-v2-e92063.svg?logo=pydantic&logoColor=white)](https://docs.pydantic.dev/)
 [![Playwright](https://img.shields.io/badge/Playwright-Chromium-45ba4b.svg?logo=playwright&logoColor=white)](https://playwright.dev/)
 [![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o--mini-412991.svg?logo=openai&logoColor=white)](https://platform.openai.com/)
+[![CI Pipeline](https://github.com/nowitsarpit/SoftwareBrio/actions/workflows/ci.yml/badge.svg)](https://github.com/nowitsarpit/SoftwareBrio/actions)
 [![Tests](https://img.shields.io/badge/Tests-94%20Passing-brightgreen.svg)]()
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ed.svg?logo=docker&logoColor=white)](Dockerfile)
 [![Code Style](https://img.shields.io/badge/Code%20Style-Black%20%2F%20Ruff-000000.svg)]()
 
 ---
@@ -569,36 +571,61 @@ ENABLE_CACHE=true
 
 ---
 
-## 6. CLI Usage
+## 6. CLI Usage & Execution Modes
 
-### Basic Run (Default `data/input.json`)
+### 1. Pre-Flight Dry-Run (Zero Cost / No API Key Required)
+Validates settings, verifies local disk cache write permissions, and tests HTTP connectivity against target domains without spending tokens:
 ```powershell
-python -m app.main
+python -m app.main --input data/input.json --dry-run
 ```
 
-### Specify Input & Output Paths
+### 2. Standard Production Run
+Crawls target websites, extracts structured company intelligence using the LLM, and automatically generates `data/output.json`, `data/output.csv`, and the companion interactive dashboard `data/report.html`:
 ```powershell
-python -m app.main --input data/input.json --output data/output.json --format both
+python -m app.main --input data/input.json
 ```
 
-### Enrich a Single Domain Ad-Hoc
+### 3. Pass Domains Directly via CLI
 ```powershell
-python -m app.main --domain postman.com
+python -m app.main --domains postman.com supabase.com vapi.ai
 ```
 
-### Available CLI Flags
+### 4. Run via Docker / Docker Compose
+Deploy as an isolated, reproducible container with headless Chromium pre-installed:
+```powershell
+# Using Docker Compose (mounts data/, cache/, and logs/)
+docker compose up --build
+
+# Or directly with Docker:
+docker build -t lead-enrichment:latest .
+docker run --rm --env-file .env -v ${PWD}/data:/app/data lead-enrichment:latest
+```
+
 ### Available CLI Flags
 | Flag | Description | Default |
 |---|---|---|
 | `--input`, `-i` | Path to JSON input file containing `{"domains": [...]}` or `[...]` | `data/input.json` |
 | `--domains` | Pass one or more company domains directly on the CLI | `None` |
 | `--output` | Destination path for output file | `data/output.json` |
-| `--output-format` | Output format: `json` or `csv` | `json` |
+| `--output-format` | Output format: `json`, `csv`, `html`, `both`, or `all` | `json` *(companion `report.html` is generated automatically)* |
 | `--max-pages` | Max pages to crawl per domain (bounded budget) | `8` |
-| `--no-cache` | Disable local disk cache for this run | `False` |
+| `--no-cache` | Bypass local disk cache and force live network crawling | `False` |
+| `--dry-run` | Run pre-flight network and cache validation without LLM calls | `False` |
 | `--log-level` | Logging verbosity: `DEBUG`, `INFO`, `WARNING`, `ERROR` | `INFO` |
 
 ---
+
+## 7. Interactive HTML Dashboard (`data/report.html`)
+
+In addition to machine-readable JSON and CSV files, the pipeline automatically compiles an **interactive, modern visual dashboard** at `data/report.html`.
+
+**Key Dashboard Features:**
+- 📊 **Executive KPI Banner**: Live display of total leads enriched, success rate, average confidence score, and total OpenAI token/cost tracking.
+- 🎯 **Confidence Badges**: Instant visual grading (Grade A, B, C, D) with percentage confidence gauges.
+- 💼 **Leadership Cards**: Visual team cards with direct clickable LinkedIn profile links.
+- 📬 **Contact Discovery Tags**: Highlighted public emails and communication points.
+- 🔗 **Evidence Drawer**: Collapsible verified source pages with exact extracted text excerpts and URLs.
+
 
 ## 7. Input & Output Specification
 

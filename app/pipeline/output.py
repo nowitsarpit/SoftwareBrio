@@ -116,10 +116,13 @@ def write_csv(
     logger.info("CSV output written to %s (%d records)", output_path, len(results))
 
 
+from app.pipeline.report import generate_html_report
+
+
 def write_results(
     results: list[CompanyEnrichment],
     output_path: Path,
-    fmt: Literal["json", "csv"] = "json",
+    fmt: Literal["json", "csv", "html", "both", "all"] = "json",
 ) -> None:
     """
     Dispatch to the appropriate serialiser based on *fmt*.
@@ -131,9 +134,24 @@ def write_results(
     output_path:
         Destination file path.
     fmt:
-        "json" or "csv".
+        "json", "csv", "html", "both", or "all".
     """
     if fmt == "csv":
         write_csv(results, output_path)
+    elif fmt == "html":
+        generate_html_report(results, output_path)
+    elif fmt in ("both", "all"):
+        json_path = output_path.with_suffix(".json")
+        csv_path = output_path.with_suffix(".csv")
+        html_path = output_path.with_name("report.html")
+        write_json(results, json_path)
+        write_csv(results, csv_path)
+        generate_html_report(results, html_path)
     else:
         write_json(results, output_path)
+        # Also generate companion HTML dashboard in the same folder by default
+        html_path = output_path.parent / "report.html"
+        try:
+            generate_html_report(results, html_path)
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("Could not auto-generate HTML dashboard: %s", exc)

@@ -32,10 +32,10 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    # ------------------------------------------------------------------ #
-    # Required
-    # ------------------------------------------------------------------ #
-    openai_api_key: str = Field(..., description="OpenAI API key")
+    openai_api_key: str = Field(
+        default="",
+        description="OpenAI API key (read from .env or OPENAI_API_KEY environment variable)",
+    )
 
     # ------------------------------------------------------------------ #
     # OpenAI
