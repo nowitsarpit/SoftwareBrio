@@ -1,13 +1,13 @@
 # Autonomous Lead Enrichment Pipeline
 
-> **Production-grade, modular Python pipeline that autonomously crawls company websites, extracts structured business intelligence using an LLM, validates data with strict Pydantic schemas, and outputs clean lead intelligence.** Built for the AI Engineer Intern take-home assignment with zero hardcoded company rules.
+> **Production-grade, modular Python pipeline that autonomously crawls company websites, extracts structured business intelligence using an LLM, validates data with strict Pydantic schemas, and outputs clean lead intelligence.** Fully automated with zero hardcoded company rules.
 
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-blue.svg?logo=python&logoColor=white)](https://www.python.org/)
 [![Pydantic v2](https://img.shields.io/badge/Pydantic-v2-e92063.svg?logo=pydantic&logoColor=white)](https://docs.pydantic.dev/)
 [![Playwright](https://img.shields.io/badge/Playwright-Chromium-45ba4b.svg?logo=playwright&logoColor=white)](https://playwright.dev/)
 [![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o--mini-412991.svg?logo=openai&logoColor=white)](https://platform.openai.com/)
 [![CI Pipeline](https://github.com/nowitsarpit/SoftwareBrio/actions/workflows/ci.yml/badge.svg)](https://github.com/nowitsarpit/SoftwareBrio/actions)
-[![Tests](https://img.shields.io/badge/Tests-94%20Passing-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-106%20Passing-brightgreen.svg)]()
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ed.svg?logo=docker&logoColor=white)](Dockerfile)
 [![Code Style](https://img.shields.io/badge/Code%20Style-Black%20%2F%20Ruff-000000.svg)]()
 
@@ -26,12 +26,11 @@
 3. [Key Engineering Highlights](#3-key-engineering-highlights)
 4. [Project Structure](#4-project-structure)
 5. [Installation & Setup](#5-installation--setup)
-6. [CLI Usage](#6-cli-usage)
-7. [Input & Output Specification](#7-input--output-specification)
-8. [Confidence Scoring & Lead Grading](#8-confidence-scoring--lead-grading)
-9. [Testing & Quality Assurance](#9-testing--quality-assurance)
-10. [Loom Demo Script (2–3 Minute Guide)](#10-loom-demo-script-23-minute-guide)
-11. [Responsible Crawling & Safety Policies](#11-responsible-crawling--safety-policies)
+6. [CLI Usage & Execution Modes](#6-cli-usage--execution-modes)
+7. [Interactive Intelligence Dashboard](#7-interactive-intelligence-dashboard-datareporthtml)
+8. [Input & Output Specification](#8-input--output-specification)
+9. [Confidence Scoring & Lead Grading](#9-confidence-scoring--lead-grading)
+10. [Testing & Quality Assurance](#10-testing--quality-assurance)
 
 ---
 
@@ -39,16 +38,16 @@
 
 | Assignment Requirement | Implementation Detail | Status |
 |---|---|:---:|
-| **Autonomous Domain Navigation** | Accepts domain list (`postman.com`, `supabase.com`, `vapi.ai`, or arbitrary domains), resolves root URLs, and auto-discovers relevant paths. | ✅ **Satisfied** |
-| **Hybrid Crawling Architecture** | Fast `httpx` HTTP retrieval with automatic fallback to headless **Playwright Chromium** for JavaScript SPAs / Cloudflare bot blocks. | ✅ **Satisfied** |
-| **Heuristic Page Prioritization** | Scores and ranks internal links (e.g. `/about`, `/pricing`, `/products`, `/contact`) to fetch high-value pages first within a bounded budget. | ✅ **Satisfied** |
+| **Autonomous Domain Navigation** | Accepts domain list (`postman.com`, `supabase.com`, `vapi.ai`, or arbitrary domains), resolves root URLs, and auto-discovers relevant paths with agentic multi-hop branch traversal. | ✅ **Satisfied** |
+| **Hybrid Crawling Architecture** | Headless **Playwright Chromium** with automatic fallback to fast `httpx` and bounded exponential-backoff retries via Tenacity. | ✅ **Satisfied** |
+| **Heuristic Page Prioritization** | Scores and ranks internal links (e.g. `/about`, `/pricing`, `/products`, `/contact`) to fetch high-value pages first within a strictly bounded budget. | ✅ **Satisfied** |
 | **Content Cleaning & Deduplication** | Strips scripts, SVGs, styles, navbars, footers, cookie banners, and removes cross-page duplicate paragraphs using exact hashing. | ✅ **Satisfied** |
-| **Deterministic Contact Extraction** | Scans raw HTML/text using RFC-compliant regex for emails, phone numbers, and social links (LinkedIn, X/Twitter, GitHub, YouTube). | ✅ **Satisfied** |
-| **Structured LLM Extraction** | OpenAI `gpt-4o-mini` / `gpt-4o` using Pydantic schema validation with automatic JSON repair loop for schema self-correction. | ✅ **Satisfied** |
-| **External Search Grounding** | Optional Perplexity AI integration (`sonar` search) to enrich missing funding, founders, or headquarters with cited web evidence. | ✅ **Satisfied** |
+| **Deterministic Contact Extraction** | Scans rendered HTML and text for verified public contact emails, decoding and sanitizing inline JS/HTML entities before LLM invocation. | ✅ **Satisfied** |
+| **Structured LLM Extraction** | OpenAI `gpt-4o-mini` / `gpt-4o` using Strict Structured Outputs (`json_schema`) with automated self-repair loop for schema self-correction. | ✅ **Satisfied** |
+| **External Search Grounding** | Optional Tavily API integration (`tavily-python`) to enrich missing leadership and corporate facts with cited web evidence. | ✅ **Satisfied** |
 | **Calibrated Confidence Scoring** | Multi-factor objective score (0.0 to 1.0) based on page coverage, deterministic evidence, and field completeness with letter grades (A–D). | ✅ **Satisfied** |
 | **JSON & CSV Output** | Formats final structured intelligence to `data/output.json` with metadata, evidence links, and execution metrics. | ✅ **Satisfied** |
-| **Comprehensive Test Suite** | **94 unit tests** covering URL normalization, discovery, regex parsing, content dedup, models, and pipeline logic. | ✅ **Satisfied** |
+| **Comprehensive Test Suite** | **106 unit tests** covering URL normalization, discovery, regex parsing, content dedup, models, search integration, and pipeline logic. | ✅ **Satisfied** |
 
 ---
 
@@ -83,8 +82,8 @@ graph TB
     end
 
     subgraph "Intelligence & LLM Subsystem"
-        LLMExt["app.llm.extractor (LLMExtractor / Instructor)"]
-        SearchEng["app.llm.search (PerplexitySearchEngine)"]
+        LLMExt["app.llm.extractor (LLMExtractor / Structured Outputs)"]
+        SearchEng["app.llm.search (TavilySearchProvider)"]
     end
 
     subgraph "Resilience & Utility Subsystem"
@@ -226,7 +225,7 @@ sequenceDiagram
     participant Browser as Playwright Browser
     participant Extractor as Content/Contact Extractor
     participant LLM as LLM Extractor (OpenAI)
-    participant Search as Perplexity Fallback
+    participant Search as Tavily Search Provider
     participant Scorer as ConfidenceScorer
     participant Out as OutputWriter
 
@@ -316,8 +315,8 @@ flowchart TD
     RetryLLM --> ValidateSchema
     ValidateSchema -- Yes --> CheckCoverage{Key Info Present?}
 
-    CheckCoverage -- Missing Crucial Info --> PerplexitySearch[Query Web Search Fallback]
-    PerplexitySearch --> EnrichMissing[Patch Missing Fields via LLM]
+    CheckCoverage -- Missing Crucial Info --> TavilySearch[Query Web Search Fallback]
+    TavilySearch --> EnrichMissing[Patch Missing Fields via LLM]
     EnrichMissing --> ComputeScore
     CheckCoverage -- Sufficient Info --> ComputeScore[Compute Weighted Confidence Score]
 
@@ -413,8 +412,8 @@ graph TB
     end
 
     subgraph CloudAPIs["External SaaS & AI Providers"]
-        OpenAIAPI["OpenAI API (GPT-4o-mini / GPT-4o)"]
-        PerplexityAPI["Perplexity AI API (Sonar Search Grounding)"]
+        OpenAIAPI["OpenAI / Gemini API (Structured Extraction)"]
+        TavilyAPI["Tavily Search API (Optional Bonus)"]
     end
 
     MainProc --> InputFile
@@ -429,7 +428,7 @@ graph TB
     Engine -->|Fast HTTP GET| TargetN
     
     Inst -->|Structured JSON / TLS| OpenAIAPI
-    Engine -->|Search Grounding / TLS| PerplexityAPI
+    Engine -->|Search Grounding / TLS| TavilyAPI
 
     Engine --> CacheDir
     Engine --> LogFile
@@ -444,78 +443,96 @@ graph TB
 ### 1. Zero Hardcoded Company Heuristics
 The pipeline contains **zero domain-specific hardcoded parsing rules** for Postman, Supabase, or Vapi. Everything is driven by generalized heuristic scorers and LLM semantic extraction.
 
-### 2. Dual-Engine Crawler (HTTP + Playwright Headless Browser)
-- Starts with lightweight, fast `httpx` GET requests (~200ms).
-- Automatically escalates to **Playwright Chromium** when encountering status `403 Forbidden`, Cloudflare challenges, SPA root divs `<div id="root"></div>`, or low-content DOMs (< 500 characters).
+### 2. Dual-Engine Crawler (Playwright Headless Browser + HTTP Fallback)
+- Executes headless **Playwright Chromium** with anti-detection flags to render modern JavaScript SPAs and hydrate dynamic content.
+- Employs bounded exponential-backoff retries via Tenacity on transient network failures and automatically falls back to lightweight `httpx` if browser processes fail.
 
 ### 3. Heuristic Link Scoring & Prioritization
 Discovered links are prioritized using semantic path keywords:
 - **Priority Tier 1 (Score: 85–100)**: `/about`, `/company`, `/team`, `/pricing`, `/plans`
 - **Priority Tier 2 (Score: 60–80)**: `/product`, `/features`, `/solutions`, `/contact`
 - **Ignored / Filtered**: Auth pages (`/login`, `/signup`), media assets (`.png`, `.pdf`), localized duplicates (`/fr/`, `/es/`).
+- **Multi-Hop Agentic Discovery**: Discovers nested child links on section pages (e.g. `/company` -> `/company/leadership`).
 
 ### 4. Cross-Page Paragraph Deduplication
 Common boilerplates (cookie notices, header navigation, footers, terms) that repeat across multiple pages are hashed and deduplicated, keeping LLM prompts concise and focused on unique content.
 
-### 5. Deterministic Regex Contact Harvesting
-Emails, phone numbers, and social links (LinkedIn, X, GitHub, YouTube) are extracted deterministically from HTML and text prior to the LLM step, preventing LLM hallucination of contact info.
+### 5. Deterministic Regex Contact Harvesting & Sanitization
+Public contact emails are harvested deterministically from mailto links and page text with unicode and HTML entity decoding, preventing LLM hallucination of contact info.
 
-### 6. Pydantic v2 Schema Enforcement & Self-Correction
-Outputs are strictly validated using Pydantic v2. If the LLM generates an invalid payload, the error feedback is automatically reflected back into a self-repair prompt loop (up to 3 retries).
+### 6. Pydantic v2 Schema Enforcement & Self-Correction Loop
+Outputs are strictly validated using OpenAI Strict Structured Outputs (`json_schema`) and Pydantic v2. If the LLM generates an invalid payload, the validation error feedback is automatically reflected back into a self-repair prompt loop (up to 2 retries).
 
-### 7. Optional Search Grounding (Perplexity API)
-When critical corporate fields (e.g. founding year, funding stage, total raised) cannot be found on public website pages, the pipeline can query Perplexity's Sonar search engine for verified citations.
+### 7. Optional Search Grounding (Tavily API)
+When configured (`SEARCH_PROVIDER=tavily`), the pipeline queries Tavily for supplementary company leadership and founder LinkedIn profiles, merging verified citations into the evidence bundle.
+
+### 8. Responsible Crawling & Safety Guardrails
+To ensure polite, legal, and ethical interaction with target websites:
+- **Polite Crawl Delays**: Enforces a configurable delay between consecutive requests to the same host (`CRAWL_DELAY_SECONDS=1.0`).
+- **Strict Concurrency Limits**: Bounds simultaneous connections to prevent server strain or rate-limiting.
+- **Domain Scope Isolation**: Restricts crawling strictly to the target company's primary domain and subdomains.
+- **Local Disk Caching**: Caches raw HTTP/browser responses using SHA-256 keys to avoid redundant bandwidth consumption.
+- **No Payload Script Execution**: Safely sanitizes scraped HTML and disables arbitrary script execution.
 
 ---
 
 ## 4. Project Structure
 
 ```
-d:\SoftwareBrio\
+SoftwareBrio/
 ├── app/
 │   ├── config.py                  # Pydantic-settings environment configuration
 │   ├── main.py                    # CLI entrypoint (Rich terminal formatting)
 │   ├── browser/
 │   │   └── browser_manager.py     # Playwright Chromium manager (lifecycle & stealth)
 │   ├── crawler/
-│   │   ├── crawler.py             # Dual HTTP/Browser crawler with retries & cache
+│   │   ├── crawler.py             # Dual Playwright/HTTP crawler with retries & cache
 │   │   ├── discovery.py           # Internal link discovery and priority ranking
 │   │   └── url_utils.py           # Domain validation, normalization, and path filtering
 │   ├── extraction/
-│   │   ├── contacts.py            # Regex extractor for emails, phones, social links
+│   │   ├── contacts.py            # Regex extractor for verified business emails
 │   │   ├── content.py             # BeautifulSoup text cleaner & paragraph dedup
 │   │   └── links.py               # Anchor tag extractor & internal link resolver
 │   ├── llm/
 │   │   ├── extractor.py           # OpenAI structured output extraction & JSON repair
-│   │   └── search.py              # Perplexity API web search fallback client
+│   │   └── search.py              # Tavily API web search fallback client
 │   ├── models/
 │   │   └── company.py             # Pydantic v2 schemas for all intelligence entities
 │   ├── pipeline/
 │   │   ├── confidence.py          # Calibrated confidence & lead score calculator
 │   │   ├── enrichment.py          # Master domain orchestration pipeline
-│   │   └── output.py              # Multi-format output writer (JSON, CSV, console)
+│   │   ├── output.py              # Multi-format output writer (JSON, CSV, console)
+│   │   └── report.py              # Modern standalone HTML SaaS intelligence dashboard
 │   ├── resilience/
 │   │   └── retry.py               # Exponential backoff decorator with jitter
 │   └── utils/
 │       ├── cache.py               # SHA-256 persistent disk response cache
 │       ├── hashing.py             # Text fingerprinting utilities
 │       └── logging.py             # Rich console logger with file rotation
+├── cache/                         # Local disk response cache (gitignored)
 ├── data/
 │   ├── input.json                 # Input company domain list
-│   └── output.json                # Generated lead intelligence output
+│   ├── output.json                # Generated lead intelligence JSON
+│   ├── output.csv                 # Flat tabular summary CSV
+│   └── report.html                # Interactive modern SaaS intelligence dashboard
 ├── tests/
 │   ├── conftest.py                # Pytest fixtures and mock responses
-│   ├── test_contacts.py           # Tests for regex email/phone/social extraction
+│   ├── test_contacts.py           # Tests for regex email extraction
 │   ├── test_content.py            # Tests for HTML cleaning & paragraph dedup
 │   ├── test_discovery.py          # Tests for heuristic link scoring & discovery
 │   ├── test_models.py             # Tests for Pydantic schema validation & serialization
 │   ├── test_pipeline.py           # Tests for pipeline orchestration & mock LLM calls
 │   └── test_url_utils.py          # Tests for domain parsing and URL filtering
+├── .dockerignore                  # Docker build ignore patterns
 ├── .env.example                   # Environment variable template
 ├── .gitignore                     # Git ignore rules for secrets, cache, and venv
+├── docker-compose.yml             # Container orchestration config
+├── Dockerfile                     # Container deployment definition with Playwright
+├── Makefile                       # Developer task runner commands
 ├── pyproject.toml                 # Project packaging and tool configuration
 ├── README.md                      # Consolidated project documentation and UML models
-└── requirements.txt               # Pinned Python package dependencies
+├── requirements.txt               # Pinned Python package dependencies
+└── run.py                         # Top-level runner script with automatic path setup
 ```
 
 ---
@@ -559,35 +576,40 @@ Edit `.env`:
 OPENAI_API_KEY=sk-...
 OPENAI_MODEL=gpt-4o-mini
 
-# Optional: Perplexity API for web search grounding
-PERPLEXITY_API_KEY=pplx-...
+# Optional: External search grounding (Tavily)
+SEARCH_PROVIDER=disabled
+# TAVILY_API_KEY=tvly-...
 
 # Pipeline Settings
-MAX_PAGES_PER_DOMAIN=5
+MAX_PAGES_PER_DOMAIN=8
 CRAWL_DELAY_SECONDS=1.0
-USE_BROWSER_FALLBACK=true
-ENABLE_CACHE=true
+HEADLESS=true
+CACHE_ENABLED=true
 ```
 
 ---
 
 ## 6. CLI Usage & Execution Modes
 
-### 1. Pre-Flight Dry-Run (Zero Cost / No API Key Required)
-Validates settings, verifies local disk cache write permissions, and tests HTTP connectivity against target domains without spending tokens:
-```powershell
-python -m app.main --input data/input.json --dry-run
-```
+You can run the pipeline either via the root runner script (`run.py`, which automatically handles environment path configuration) or via the module entrypoint (`python -m app.main`).
 
-### 2. Standard Production Run
-Crawls target websites, extracts structured company intelligence using the LLM, and automatically generates `data/output.json`, `data/output.csv`, and the companion interactive dashboard `data/report.html`:
+### 1. Standard Production Run
+Crawls target websites, extracts structured company intelligence using the LLM, and automatically generates `data/output.json`, `data/output.csv`, and the interactive SaaS dashboard `data/report.html`:
 ```powershell
+python run.py --input data/input.json
+# or
 python -m app.main --input data/input.json
 ```
 
-### 3. Pass Domains Directly via CLI
+### 2. Pass Domains Directly via CLI
 ```powershell
-python -m app.main --domains postman.com supabase.com vapi.ai
+python run.py --domains postman.com supabase.com vapi.ai
+```
+
+### 3. Pre-Flight Dry-Run (Zero Cost / No API Key Required)
+Validates settings, verifies local disk cache write permissions, and tests HTTP connectivity against target domains without spending tokens:
+```powershell
+python run.py --input data/input.json --dry-run
 ```
 
 ### 4. Run via Docker / Docker Compose
@@ -615,7 +637,7 @@ docker run --rm --env-file .env -v ${PWD}/data:/app/data lead-enrichment:latest
 
 ---
 
-## 7. Interactive HTML Dashboard (`data/report.html`)
+## 7. Interactive Intelligence Dashboard (`data/report.html`)
 
 In addition to machine-readable JSON and CSV files, the pipeline automatically compiles an **interactive, modern visual dashboard** at `data/report.html`.
 
@@ -626,8 +648,9 @@ In addition to machine-readable JSON and CSV files, the pipeline automatically c
 - 📬 **Contact Discovery Tags**: Highlighted public emails and communication points.
 - 🔗 **Evidence Drawer**: Collapsible verified source pages with exact extracted text excerpts and URLs.
 
+---
 
-## 7. Input & Output Specification
+## 8. Input & Output Specification
 
 ### Input Format (`data/input.json`)
 ```json
@@ -713,7 +736,7 @@ In addition to machine-readable JSON and CSV files, the pipeline automatically c
 
 ---
 
-## 8. Confidence Scoring & Lead Grading
+## 9. Confidence Scoring & Lead Grading
 
 The confidence score ($0.0 - 1.0$) is calculated via an objective, weighted multi-factor rubric:
 
@@ -723,8 +746,8 @@ $$\text{Confidence Score} = \sum (\text{Weight}_i \times \text{Factor}_i)$$
 |---|:---:|---|
 | **Page Coverage** | 25% | Ratio of target pages successfully crawled (homepage, about, pricing, products). |
 | **Evidence Volume** | 20% | Quality and length of cleaned text content retrieved (> 5,000 characters). |
-| **Deterministic Contacts** | 20% | Verification of discovered public emails, telephone numbers, and social links. |
-| **Field Completeness** | 20% | Absence of null / unknown fields across key people, funding, and ICP attributes. |
+| **Deterministic Contacts** | 20% | Verification of discovered public business emails and mailto links. |
+| **Field Completeness** | 20% | Absence of null / unknown fields across leadership, overview, and ICP attributes. |
 | **Source Grounding** | 15% | Percentage of factual statements linked directly to crawled evidence pages. |
 
 ### Lead Scoring Grades
@@ -735,9 +758,9 @@ $$\text{Confidence Score} = \sum (\text{Weight}_i \times \text{Factor}_i)$$
 
 ---
 
-## 9. Testing & Quality Assurance
+## 10. Testing & Quality Assurance
 
-The test suite contains **94 unit tests** executed using `pytest`. Tests run in isolated environments using mocked HTTP responses and mock LLM calls.
+The test suite contains **106 unit tests** executed using `pytest`. Tests run in isolated environments using mocked HTTP responses and mock LLM calls with zero external network dependency.
 
 ### Run All Tests
 ```powershell
@@ -748,99 +771,6 @@ pytest tests/ -v
 - `tests/test_url_utils.py`: Domain sanitization, path normalization, deduplication, and exclusion rules.
 - `tests/test_discovery.py`: Anchor link parsing, internal URL scoring, and priority queue ordering.
 - `tests/test_content.py`: HTML stripping, boilerplate filtering, and cross-page paragraph deduplication.
-- `tests/test_contacts.py`: Regex extraction for complex email formats, telephone variations, and social profile handles.
+- `tests/test_contacts.py`: Regex extraction for verified business contact emails, mailto links, and unicode entity decoding.
 - `tests/test_models.py`: Pydantic validation checks, field constraints, defaults, and JSON serialization.
 - `tests/test_pipeline.py`: Full end-to-end pipeline orchestration, caching mechanisms, and error recovery.
-
----
-
-## 10. Loom Demo Script (2–3 Minute Guide)
-
-Use this structured outline for recording your assignment submission video:
-
-```
-[0:00 - 0:30] Introduction & Problem
-- State name and project purpose: Autonomous Lead Enrichment Pipeline.
-- Highlight the core challenge: Extracting grounded B2B company intelligence without 
-  hardcoded scrapers or brittle heuristics.
-
-[0:30 - 1:15] Architecture Walkthrough
-- Point to the Mermaid Component & Sequence diagrams in README.md.
-- Explain the Hybrid Crawler: Fast HTTP with automatic Playwright Chromium fallback.
-- Explain Heuristic Page Prioritization: Smart scoring of /about, /pricing, and /team links.
-- Highlight Deterministic Contact Extraction: Regex harvesting before the LLM step.
-
-[1:15 - 2:00] Live Execution & Terminal Demo
-- Run the pipeline: python -m app.main --input data/input.json
-- Show the Rich console output displaying live domain progress, discovered links, 
-  and token cost tracking.
-- Open data/output.json: Show structured fields (ICP, pricing model, key people, 
-  confidence scores, and source evidence URLs).
-
-[2:00 - 2:30] Resilience, Testing & Wrap-Up
-- Run pytest tests/ -v (demonstrate 94/94 passing tests in < 1 second).
-- Mention safety features: Polite crawl delays, local disk caching, exponential retries.
-- Conclude: Production-grade, maintainable architecture ready for deployment.
-```
-
----
-
-## 11. Responsible Crawling & Safety Policies
-
-To ensure responsible, legal, and ethical interaction with target websites:
-
-1. **Polite Crawl Delays**: Enforces a configurable delay between consecutive requests to the same host (`CRAWL_DELAY_SECONDS=1.0`).
-2. **Strict Concurrency Limits**: Limits simultaneous requests per host to prevent denial-of-service issues.
-3. **No Auth/CAPTCHA Bypass**: Does not attempt to crack CAPTCHAs, bypass paywalls, or circumvent authentication guards.
-4. **No External Traversal**: Restricts crawling strictly to the target company's primary domain and subdomains.
-5. **No JavaScript Execution of Scraped Payloads**: Safely sanitizes all scraped text and disables script execution.
-6. **Local Disk Caching**: Caches raw HTTP/browser responses using SHA-256 keys to avoid redundant bandwidth consumption.
-
----
-
-## 12. Submission Guide & Screening Checklist (SoftwareBrio)
-
-### Submission Deliverables Checklist
-- [x] **GitHub Repository Link**: Public git repo containing clean modular Python code (`https://github.com/nowitsarpit/SoftwareBrio`).
-- [x] **Dependency Specification**: `pyproject.toml` and `requirements.txt` with pinned dependencies.
-- [x] **Documentation**: Consolidated `README.md` explaining environment configuration, UML architecture, and local run.
-- [x] **Sample Output Files**: Committed [`data/output.json`](data/output.json) and [`data/output.csv`](data/output.csv) for `postman.com`, `supabase.com`, and `vapi.ai`.
-- [x] **Loom Walkthrough Script**: Structured 2–3 minute video presentation script included in [Section 10](#10-loom-demo-script-23-minute-guide).
-- [x] **Mandatory Screening Question**: Explicitly confirmed below.
-
----
-
-### Email Submission Template
-
-**Send To**: `support@softwarebrio.com`  
-**Subject**: `[AI Intern Submission] - Arpit` *(replace with your full name)*  
-
-```
-Hi SoftwareBrio Hiring Team,
-
-Please find my submission for the AI Engineer Intern take-home assignment below:
-
-1. GitHub Repository:
-   https://github.com/nowitsarpit/SoftwareBrio
-
-2. Sample Output Files:
-   - data/output.json (enclosed in repo)
-   - data/output.csv (enclosed in repo)
-
-3. Loom Video Walkthrough (2-3 mins):
-   [Insert your Loom recording link here]
-
-4. LinkedIn Profile:
-   [Insert your LinkedIn profile URL here]
-
-5. Mandatory Screening Question:
-   "Are you 100% comfortable spending roughly 40% of your working hours on manual lead prospecting, email discovery, and account handling alongside your AI engineering tasks? (Yes / No)"
-   
-   Answer: Yes, 100% comfortable. I appreciate the hybrid execution-and-building nature of the role and look forward to automating prospecting workflows based on direct hands-on operational experience.
-
-Thank you for your consideration!
-
-Best regards,
-[Your Name]
-(+91) - [Your Phone Number]
-```

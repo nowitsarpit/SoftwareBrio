@@ -7,9 +7,11 @@ from __future__ import annotations
 import pytest
 
 from app.crawler.url_utils import (
+    build_base_url,
     deduplicate_urls,
     extract_domain,
     is_crawlable,
+    is_homepage_url,
     is_same_domain,
     normalize_domain,
     normalize_url,
@@ -132,3 +134,19 @@ class TestDeduplicateUrls:
 
     def test_empty(self) -> None:
         assert deduplicate_urls([]) == []
+
+
+class TestBuildBaseUrl:
+    def test_canonical_trailing_slash(self) -> None:
+        assert build_base_url("vapi.ai") == "https://vapi.ai/"
+        assert build_base_url("postman.com") == "https://postman.com/"
+
+
+class TestIsHomepageUrl:
+    def test_matches_root_with_or_without_slash(self) -> None:
+        assert is_homepage_url("https://vapi.ai", "https://vapi.ai/") is True
+        assert is_homepage_url("https://vapi.ai/", "https://vapi.ai") is True
+        assert is_homepage_url("https://vapi.ai/", "https://vapi.ai/") is True
+
+    def test_rejects_subpath(self) -> None:
+        assert is_homepage_url("https://vapi.ai/about", "https://vapi.ai/") is False

@@ -12,6 +12,7 @@ from app.crawler.discovery import ScoredLink, prioritize_links, score_url
 class TestScoreUrl:
     def test_homepage_scores_high(self) -> None:
         assert score_url("https://postman.com/") == 100
+        assert score_url("https://postman.com") == 100
 
     def test_team_scores_highest(self) -> None:
         about = score_url("https://postman.com/about")

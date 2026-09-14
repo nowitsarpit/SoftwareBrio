@@ -81,6 +81,7 @@ class PermanentError(EnrichmentError):
 _TRANSIENT_EXCEPTIONS: tuple[type[Exception], ...] = (
     NetworkError,
     TimeoutError,
+    BrowserError,
     LLMError,
     # Also handle raw httpx / playwright transients that slip through.
     httpx.TimeoutException,

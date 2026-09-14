@@ -65,6 +65,22 @@ class TestExtractEmailsFromHtml:
         emails = extract_emails_from_html(html)
         assert "noreply@sentry.io" not in emails
 
+    def test_strips_unicode_escape_artifacts(self) -> None:
+        html = r'var json = "{\"email\": \"\u003einfo@postman.com\"}";'
+        emails = extract_emails_from_html(html)
+        assert "info@postman.com" in emails
+        assert "u003einfo@postman.com" not in emails
+
+    def test_escaped_html_entities(self) -> None:
+        html = '<p>&gt;support@company.org&lt;</p>'
+        emails = extract_emails_from_html(html)
+        assert "support@company.org" in emails
+
+    def test_rejects_js_asset_bundle_filenames(self) -> None:
+        html = '<script src="vue@3.4.15.min.3a7e0323bd7d.js"></script><p>Contact vue-shadow-dom@4.2.0.c6ed52f5c4de.mjs</p>'
+        emails = extract_emails_from_html(html)
+        assert emails == []
+
 
 class TestMergeEmails:
     def test_merges_multiple_lists(self) -> None:

@@ -130,3 +130,37 @@ class TestCompanyEnrichment:
     def test_requires_domain(self) -> None:
         with pytest.raises(ValidationError):
             CompanyEnrichment()  # type: ignore[call-arg]
+
+
+class TestRawLLMExtraction:
+    def test_valid_llm_payload(self) -> None:
+        from app.llm.extractor import RawLLMExtraction
+
+        payload = {
+            "company_overview": "Acme builds tools. They serve developers.",
+            "ideal_customer_profile": "Full-stack web developers and engineering leads.",
+            "leadership": [
+                {"name": "Alice", "title": "CEO", "linkedin_url": "https://linkedin.com/in/alice", "source_url": None}
+            ],
+            "confidence_score": 0.85,
+            "sources": [
+                {"url": "https://acme.com", "page_title": "Acme", "relevant_excerpt": "Acme is a toolmaker"}
+            ],
+        }
+        obj = RawLLMExtraction.model_validate(payload)
+        assert obj.company_overview.startswith("Acme builds tools")
+        assert len(obj.leadership) == 1
+        assert obj.leadership[0].name == "Alice"
+
+    def test_missing_required_field_raises(self) -> None:
+        from app.llm.extractor import RawLLMExtraction
+
+        # Missing ideal_customer_profile
+        payload = {
+            "company_overview": "Acme builds tools. They serve developers.",
+            "leadership": [],
+            "confidence_score": 0.5,
+            "sources": [],
+        }
+        with pytest.raises(ValidationError):
+            RawLLMExtraction.model_validate(payload)

@@ -1,163 +1,191 @@
 [
   {
     "domain": "postman.com",
-    "company_overview": "Postman is an industry-standard API platform that simplifies each step of the API lifecycle and streamlines collaboration for software developers. The company enables over 30 million developers and 500,000 organizations to build, test, document, and monitor robust APIs.",
-    "ideal_customer_profile": "Software engineering teams, API developers, QA engineers, and enterprise organizations building or consuming internal and external APIs.",
+    "company_overview": "Postman is the AI-native API Platform that helps engineers develop, test, manage, and distribute APIs and services. It is designed for enterprise scale and serves organizations by building, testing, and maintaining APIs across their organization.",
+    "ideal_customer_profile": "Postman's ideal customer profile includes engineers and API testers within organizations, particularly those at an enterprise scale, who are responsible for developing, testing, managing, and distributing APIs.",
     "contact_emails": [
-      "help@postman.com",
-      "security@postman.com"
+      "academy@postman.com",
+      "accommodations@postman.com",
+      "danny@postman.com",
+      "info-jp@postman.com",
+      "info@postman.com"
     ],
-    "leadership": [
-      {
-        "name": "Abhinav Asthana",
-        "title": "Co-founder & CEO",
-        "linkedin_url": "https://www.linkedin.com/in/abhinavasthana",
-        "source_url": "https://postman.com/about"
-      },
-      {
-        "name": "Ankit Sobti",
-        "title": "Co-founder & CTO",
-        "linkedin_url": "https://www.linkedin.com/in/ankitsobti",
-        "source_url": "https://postman.com/about"
-      },
-      {
-        "name": "Abhijit Kane",
-        "title": "Co-founder",
-        "linkedin_url": "https://www.linkedin.com/in/abhijitkane",
-        "source_url": "https://postman.com/about"
-      }
-    ],
-    "confidence_score": 0.95,
+    "leadership": [],
+    "confidence_score": 0.83,
     "sources": [
       {
-        "url": "https://postman.com",
-        "page_title": "Postman API Platform",
-        "relevant_excerpt": "Postman is an API platform for building and using APIs. Postman simplifies each step of the API lifecycle and streamlines collaboration."
+        "url": "https://postman.com/",
+        "page_title": "Postman: The World's Leading API Platform | Sign Up for Free",
+        "relevant_excerpt": "The AI-native API Platform Develop, test, manage, and distribute APIs and services. Built for engineers. Designed for enterprise scale. Meet the AI Engineer Postman's AI Engineer takes on the work of building, testing, and maintaining APIs across your organization, grounded in the context of every s"
       },
       {
-        "url": "https://postman.com/pricing",
-        "page_title": "Postman Plans and Pricing",
-        "relevant_excerpt": "Free plan for individuals, Basic, Professional, and Enterprise plans with advanced API governance and security."
+        "url": "https://www.postman.com/",
+        "page_title": "Postman: The World's Leading API Platform | Sign Up for Free",
+        "relevant_excerpt": "The AI-native API Platform Develop, test, manage, and distribute APIs and services. Built for engineers. Designed for enterprise scale. Meet the AI Engineer Postman's AI Engineer takes on the work of building, testing, and maintaining APIs across your organization, grounded in the context of every s"
       },
       {
-        "url": "https://postman.com/company/about-us",
-        "page_title": "About Postman",
-        "relevant_excerpt": "Founded in 2014 by Abhinav Asthana, Ankit Sobti, and Abhijit Kane to make API development easier."
+        "url": "https://academy.postman.com/",
+        "page_title": "Postman Academy",
+        "relevant_excerpt": "As an API tester, you play a crucial role in maintaining a reliable user experience. Every defect you catch before production is a win for customer trust. API testing isn't just about preventing issues—it's about giving your business the reliable foundation to succeed."
       }
     ],
     "crawl_metadata": {
-      "pages_attempted": 5,
-      "pages_successful": 5,
+      "pages_attempted": 8,
+      "pages_successful": 8,
       "pages_failed": 0,
-      "extraction_timestamp": "2026-09-13T11:08:25.570412Z",
-      "duration_seconds": 4.82,
+      "extraction_timestamp": "2026-09-13T16:54:10.857102Z",
+      "duration_seconds": 16.95,
       "errors": []
     },
     "llm_usage": {
-      "model": "gpt-4o-mini",
-      "input_tokens": 4210,
-      "output_tokens": 385,
-      "total_tokens": 4595,
-      "estimated_cost_usd": 0.000862
+      "model": "gemini-2.5-flash",
+      "input_tokens": 4417,
+      "output_tokens": 456,
+      "total_tokens": 4873,
+      "estimated_cost_usd": null
     },
     "pipeline_errors": [],
     "status": "success"
   },
   {
     "domain": "supabase.com",
-    "company_overview": "Supabase is an open source Firebase alternative providing developers with a complete Postgres backend suite including instant APIs, authentication, storage, and edge functions. It allows engineering teams to build production-ready applications with zero infrastructure management.",
-    "ideal_customer_profile": "Full-stack developers, mobile engineers, modern startups, and enterprise teams seeking an open-source, Postgres-based alternative to Firebase.",
+    "company_overview": "Supabase provides a Postgres development platform that includes a database, authentication, data APIs, edge functions, realtime data, storage, and vector embeddings. It serves developers and companies, from hackathon contestants to enterprises, enabling them to build and scale applications with an open-source, integrated backend solution.",
+    "ideal_customer_profile": "Supabase targets a broad range of users including hackathon contestants, startups, agencies, enterprise innovation teams, and fast-growing companies worldwide. These customers seek a scalable, secure, and performant open-source backend solution for various applications, from AI-generated apps and GenAI/RAG systems to user management, high-traffic services, and mission-critical software requiring SOC 2, HIPAA, and GDPR compliance.",
     "contact_emails": [
-      "support@supabase.com",
-      "press@supabase.com"
+      "abuse@supabase.com",
+      "help-events@supabase.com",
+      "legal@supabase.com",
+      "privacy@supabase.com",
+      "security@supabase.com"
     ],
     "leadership": [
       {
         "name": "Paul Copplestone",
-        "title": "Co-founder & CEO",
-        "linkedin_url": "https://www.linkedin.com/in/paulcopplestone",
-        "source_url": "https://supabase.com/about"
+        "title": "CEO",
+        "linkedin_url": null,
+        "source_url": "https://select.supabase.com/"
       },
       {
         "name": "Ant Wilson",
-        "title": "Co-founder & CTO",
-        "linkedin_url": "https://www.linkedin.com/in/antwilson",
-        "source_url": "https://supabase.com/about"
-      }
-    ],
-    "confidence_score": 0.92,
-    "sources": [
-      {
-        "url": "https://supabase.com",
-        "page_title": "Supabase | The Open Source Firebase Alternative",
-        "relevant_excerpt": "Build in a weekend. Scale to millions. Supabase is an open source Firebase alternative. Start your project with a Postgres database, Authentication, instant APIs, Edge Functions, Realtime subscriptions, and Storage."
+        "title": "CTO",
+        "linkedin_url": null,
+        "source_url": "https://select.supabase.com/"
       },
       {
-        "url": "https://supabase.com/pricing",
-        "page_title": "Pricing & Plans | Supabase",
-        "relevant_excerpt": "Free tier with 500MB database, Pro plan at /mo, Team and Enterprise tiers with custom SLA and security guarantees."
+        "name": "Sugu Sougoumarane",
+        "title": "Multigres Lead",
+        "linkedin_url": null,
+        "source_url": "https://select.supabase.com/"
+      },
+      {
+        "name": "Deepthi Sigireddi",
+        "title": "Head of Databases",
+        "linkedin_url": null,
+        "source_url": "https://select.supabase.com/"
+      },
+      {
+        "name": "Tracy Lane",
+        "title": "General Counsel",
+        "linkedin_url": null,
+        "source_url": "https://supabase.com/contact-us"
+      }
+    ],
+    "confidence_score": 0.98,
+    "sources": [
+      {
+        "url": "https://supabase.com/",
+        "page_title": "Supabase | The Postgres Development Platform",
+        "relevant_excerpt": "Start your project with a Postgres database. Add Authentication, Data APIs, Edge Functions, Realtime Data, Storage, and Vector embeddings. Build in a weekend Scale to millions. Trusted by fast-growing companies worldwide."
+      },
+      {
+        "url": "https://supabase.com/solutions/enterprise",
+        "page_title": "Supabase for Enterprise",
+        "relevant_excerpt": "Hackathon Contestants, Startups, Agencies, Enterprise, Innovation Teams. Supabase ensures optimal database performance at any scale. Keep your data secure with SOC 2, HIPAA, and GDPR compliance."
+      },
+      {
+        "url": "https://select.supabase.com/",
+        "page_title": "Select26 | Oct 2 | Supabase curated day of talks",
+        "relevant_excerpt": "Speakers: Paul Copplestone CEO, Supabase; Ant Wilson CTO, Supabase; Sugu Sougoumarane Multigres Lead, Supabase; Deepthi Sigireddi Head of Databases, Supabase."
+      },
+      {
+        "url": "https://supabase.com/contact-us",
+        "page_title": "Contact Us | Supabase",
+        "relevant_excerpt": "In jurisdictions that require the designation of a Grievance Officer or similar compliance contact, Tracy Lane, General Counsel of Supabase, Inc., serves in that role."
       }
     ],
     "crawl_metadata": {
-      "pages_attempted": 4,
-      "pages_successful": 4,
+      "pages_attempted": 8,
+      "pages_successful": 8,
       "pages_failed": 0,
-      "extraction_timestamp": "2026-09-13T11:08:25.570412Z",
-      "duration_seconds": 3.95,
+      "extraction_timestamp": "2026-09-13T16:54:03.710053Z",
+      "duration_seconds": 15.64,
       "errors": []
     },
     "llm_usage": {
-      "model": "gpt-4o-mini",
-      "input_tokens": 3890,
-      "output_tokens": 340,
-      "total_tokens": 4230,
-      "estimated_cost_usd": 0.000787
+      "model": "gemini-2.5-flash",
+      "input_tokens": 8313,
+      "output_tokens": 795,
+      "total_tokens": 9108,
+      "estimated_cost_usd": null
     },
     "pipeline_errors": [],
     "status": "success"
   },
   {
     "domain": "vapi.ai",
-    "company_overview": "Vapi is a voice AI developer platform that enables software engineers to build, deploy, and scale natural voice conversational agents in minutes. The platform orchestrates low-latency speech-to-text, large language models, and text-to-speech for production voice assistants.",
-    "ideal_customer_profile": "AI engineers, product teams, customer support platforms, healthcare services, and call-center software developers building automated conversational voice experiences.",
-    "contact_emails": [
-      "support@vapi.ai"
-    ],
+    "company_overview": "Vapi is a developer platform that enables the creation and deployment of advanced voice AI agents. It handles complex infrastructure, allowing organizations to build, test, and improve voice agents for various business needs.",
+    "ideal_customer_profile": "Vapi targets a broad range of customers, from individual developers and small teams using its usage-based \"Build\" plan to large enterprises and Fortune 100 companies requiring the \"Scale\" plan. These enterprise clients need robust features like SOC 2, HIPAA, PCI compliance, SSO, dedicated support, and the ability to handle millions of calls with sub-500ms latency for use cases such as customer support, sales, appointment scheduling, and medical triage.",
+    "contact_emails": [],
     "leadership": [
       {
-        "name": "Jordan Dube",
-        "title": "Co-founder & CEO",
+        "name": "Jason Mitura",
+        "title": "VP of Software Development",
         "linkedin_url": null,
-        "source_url": "https://vapi.ai/about"
+        "source_url": "https://vapi.ai/"
       }
     ],
-    "confidence_score": 0.88,
+    "confidence_score": 0.84,
     "sources": [
       {
-        "url": "https://vapi.ai",
-        "page_title": "Vapi | Voice AI for Developers",
-        "relevant_excerpt": "Developers use Vapi to build voice agents for customer service, tele-health, inbound qualification, and outbound calls with sub-700ms latency."
+        "url": "https://vapi.ai/",
+        "page_title": "Vapi - Build Advanced Voice AI Agents",
+        "relevant_excerpt": "\"Build, deploy, and improve voice agents as fast as you ship.\" \"Trusted at enterprise scale\" \"Everything a Fortune 100 needs to deploy at scale\" \"Jason Mitura VP of Software Development\""
+      },
+      {
+        "url": "https://docs.vapi.ai/",
+        "page_title": "Introduction | Vapi",
+        "relevant_excerpt": "\"Vapi is the developer platform for building voice AI agents. We handle the complex infrastructure so you can focus on creating great voice experiences.\" \"Popular use cases Customer Support, Sales & Lead Qualification, Appointment Scheduling, Medical Triage & Scheduling, E-commerce Order Management\""
       },
       {
         "url": "https://vapi.ai/pricing",
-        "page_title": "Vapi Pricing",
-        "relevant_excerpt": "Pay-as-you-go pricing at .05/minute plus underlying provider costs for STT, LLM, and TTS."
+        "page_title": "Vapi - Build Advanced Voice AI Agents",
+        "relevant_excerpt": "\"Build\" \"Usage-based call minutes (60+ minutes included). Model costs are passed on to customer .\" \"Scale\" \"Annual Contract Fixed Platform fee and committed volume\" \"Enterprise grade SOC 2, HIPAA, PCI, SSO, RBAC\""
+      },
+      {
+        "url": "https://vapi.ai/sales",
+        "page_title": "Contact Sales - VAPI",
+        "relevant_excerpt": "\"Vapi Scale is built for teams that need reliability, scale, and support.\" \"Scale to millions of calls with sub-500ms latency.\" \"SOC2, HIPAA, & PCI compliant\""
+      },
+      {
+        "url": "https://vapi.ai/customers",
+        "page_title": "Vapi Customers",
+        "relevant_excerpt": "\"From small businesses to global enterprises, Vapi enables organizations of all kinds to speak human to their customers\" \"Company size 10,000+ 1000-5000 500-1000 5000-10000 >500\""
       }
     ],
     "crawl_metadata": {
-      "pages_attempted": 4,
-      "pages_successful": 4,
+      "pages_attempted": 8,
+      "pages_successful": 8,
       "pages_failed": 0,
-      "extraction_timestamp": "2026-09-13T11:08:25.570412Z",
-      "duration_seconds": 3.41,
+      "extraction_timestamp": "2026-09-13T16:54:26.990289Z",
+      "duration_seconds": 7.42,
       "errors": []
     },
     "llm_usage": {
-      "model": "gpt-4o-mini",
-      "input_tokens": 3120,
-      "output_tokens": 310,
-      "total_tokens": 3430,
-      "estimated_cost_usd": 0.000654
+      "model": "gemini-2.5-flash",
+      "input_tokens": 6398,
+      "output_tokens": 715,
+      "total_tokens": 7113,
+      "estimated_cost_usd": null
     },
     "pipeline_errors": [],
     "status": "success"

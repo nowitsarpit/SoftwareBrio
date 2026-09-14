@@ -25,6 +25,11 @@ import sys
 import time
 from pathlib import Path
 
+# Ensure project root is present in sys.path regardless of execution context
+_PROJECT_ROOT = str(Path(__file__).resolve().parent.parent)
+if _PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, _PROJECT_ROOT)
+
 from app.config import settings
 from app.llm.extractor import LLMExtractor
 from app.llm.search import build_search_provider
@@ -192,6 +197,7 @@ async def run_enrichment(
     llm_extractor = LLMExtractor(
         api_key=runtime_settings.openai_api_key,
         model=runtime_settings.openai_model,
+        base_url=runtime_settings.openai_base_url,
     )
 
     search_provider = build_search_provider(

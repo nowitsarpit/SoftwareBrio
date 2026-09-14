@@ -16,12 +16,25 @@ from dataclasses import dataclass, field
 import httpx
 from playwright.async_api import Page, TimeoutError as PlaywrightTimeout, Error as PlaywrightError
 
+
+def _sanitize_html(text: str) -> str:
+    """Strip lone UTF-16 surrogate characters that cause json.dump to crash.
+
+    Playwright occasionally returns HTML containing lone surrogate code points
+    (U+D800–U+DFFF) which are valid in Python's internal UCS-4 representation
+    but illegal in UTF-8.  Passing such strings to ``json.dump(...,
+    ensure_ascii=False)`` raises ``UnicodeEncodeError: surrogates not allowed``.
+    We replace invalid surrogates with the Unicode replacement character (U+FFFD).
+    """
+    return text.encode("utf-8", errors="surrogatepass").decode("utf-8", errors="replace")
+
 from app.resilience.retry import (
     BrowserError,
     NetworkError,
     PermanentError,
     TimeoutError,
     classify_playwright_error,
+    with_retry,
 )
 
 logger = logging.getLogger(__name__)
@@ -53,6 +66,7 @@ class PageResult:
 # ---------------------------------------------------------------------------
 
 
+@with_retry(max_attempts=2, min_wait=1.0, max_wait=3.0)
 async def fetch_page_with_browser(
     page: Page,
     url: str,
@@ -94,7 +108,7 @@ async def fetch_page_with_browser(
         if status_code and status_code >= 400:
             logger.warning("HTTP %s for %s", status_code, url)
 
-        html = await page.content()
+        html = _sanitize_html(await page.content())
         title = await page.title()
 
         return PageResult(
@@ -114,6 +128,7 @@ async def fetch_page_with_browser(
         raise classify_playwright_error(exc) from exc
 
 
+@with_retry(max_attempts=2, min_wait=1.0, max_wait=3.0)
 async def fetch_page_with_httpx(
     url: str,
     timeout: int = 30,
@@ -137,7 +152,7 @@ async def fetch_page_with_httpx(
 
         return PageResult(
             url=url,
-            html=response.text,
+            html=_sanitize_html(response.text),
             title="",
             status_code=response.status_code,
             success=True,

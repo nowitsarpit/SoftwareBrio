@@ -201,6 +201,25 @@ class DomainEnrichmentPipeline:
 
         # Build compact evidence bundle.
         evidence = _build_evidence_bundle(crawled_pages, self._settings.max_content_chars)
+
+        # Supplementary search grounding (Bonus)
+        search_snippets: list[str] = []
+        if self._search and getattr(self._settings, "search_provider", "disabled") != "disabled":
+            try:
+                search_query = f"{domain} company leadership founders linkedin"
+                search_results = await self._search.search(search_query, max_results=3)
+                if search_results:
+                    logger.info("[%s] Supplementary search retrieved %d results", domain, len(search_results))
+                    for res in search_results:
+                        search_snippets.append(
+                            f"--- SEARCH RESULT: {res.url} ---\nTitle: {res.title}\n{res.content}"
+                        )
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("[%s] Supplementary search error: %s", domain, exc)
+
+        if search_snippets:
+            evidence += "\n\n=== SUPPLEMENTARY EXTERNAL SEARCH EVIDENCE ===\n" + "\n\n".join(search_snippets)
+
         logger.info(
             "[%s] Evidence bundle: %d chars from %d page(s)",
             domain,
@@ -270,6 +289,12 @@ class DomainEnrichmentPipeline:
         crawled: list[CrawledPage] = []
         visited_urls: set[str] = set()
 
+        # Seed visited_urls with base URL variants to prevent duplicate homepage crawls
+        base_clean = base_url.rstrip("/")
+        visited_urls.add(base_url)
+        visited_urls.add(base_clean)
+        visited_urls.add(base_clean + "/")
+
         # ---- Step 1: Homepage ----
         homepage_result = await self._fetch_with_cache(page, base_url)
         meta.pages_attempted += 1
@@ -283,7 +308,11 @@ class DomainEnrichmentPipeline:
             return crawled, meta, errors
 
         meta.pages_successful += 1
+        home_clean = homepage_result.url.rstrip("/")
         visited_urls.add(homepage_result.url)
+        visited_urls.add(home_clean)
+        visited_urls.add(home_clean + "/")
+
         homepage_page = self._process_page(homepage_result)
         crawled.append(homepage_page)
         logger.info("[%s] Homepage loaded (via %s)", domain, homepage_result.fetched_via)
@@ -309,11 +338,15 @@ class DomainEnrichmentPipeline:
         for candidate in candidate_pages:
             if remaining_budget <= 0:
                 break
-            if candidate.url in visited_urls:
+            cand_norm = candidate.url.rstrip("/")
+            if candidate.url in visited_urls or cand_norm in visited_urls or cand_norm == base_clean:
                 continue
 
             visited_urls.add(candidate.url)
+            visited_urls.add(cand_norm)
+            visited_urls.add(cand_norm + "/")
             meta.pages_attempted += 1
+            remaining_budget -= 1  # Decrement budget on every attempt
 
             result = await self._fetch_with_cache(page, candidate.url)
 
@@ -327,7 +360,21 @@ class DomainEnrichmentPipeline:
                     candidate.url,
                     candidate.score,
                 )
-                remaining_budget -= 1
+
+                # Agentic multi-hop discovery: discover child links on high-value sections (/about, /company, /team)
+                if remaining_budget > 0 and any(k in candidate.url.lower() for k in ("/about", "/company", "/team")):
+                    sub_links = extract_links_from_html(result.html, candidate.url)
+                    sub_candidates = prioritize_links(
+                        raw_links=sub_links,
+                        base_url=base_url,
+                        target_domain=domain,
+                        max_pages=4,
+                    )
+                    for sc in sub_candidates:
+                        sc_clean = sc.url.rstrip("/")
+                        if sc.url not in visited_urls and sc_clean not in visited_urls and sc_clean != base_clean:
+                            if not any(c.url.rstrip("/") == sc_clean for c in candidate_pages):
+                                candidate_pages.append(sc)
             else:
                 meta.pages_failed += 1
                 error_msg = f"Failed: {candidate.url} – {result.error}"

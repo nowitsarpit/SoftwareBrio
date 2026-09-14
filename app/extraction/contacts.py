@@ -36,6 +36,7 @@ _EMAIL_BLACKLIST_PATTERNS: list[re.Pattern[str]] = [
     re.compile(r"sentry\.io$", re.IGNORECASE),
     re.compile(r"w3\.org$", re.IGNORECASE),
     re.compile(r"schema\.org$", re.IGNORECASE),
+    re.compile(r"\.(js|mjs|cjs|ts|tsx|css|svg|woff2?|map|wasm)$", re.IGNORECASE),
 ]
 
 # Maximum length for a valid email address.
@@ -60,8 +61,12 @@ def _is_valid_email(email: str) -> bool:
 
 
 def _normalize_email(email: str) -> str:
-    """Lowercase and strip an email address."""
-    return email.strip().lower()
+    """Lowercase, strip, and clean unicode escape / HTML entity artifacts from email."""
+    cleaned = email.strip().lower()
+    # Strip common JS/HTML unicode escape prefixes (e.g. u003e, u003c, gt;, lt;)
+    cleaned = re.sub(r"^(u003[ce]|gt;|lt;)", "", cleaned)
+    cleaned = cleaned.lstrip(".-_+~")
+    return cleaned
 
 
 # ---------------------------------------------------------------------------
@@ -87,7 +92,19 @@ def extract_emails_from_html(html: str) -> list[str]:
     list[str]
         Deduplicated, lowercased email addresses found on the page.
     """
-    soup = BeautifulSoup(html, "lxml")
+    if not html:
+        return []
+
+    # Decode unicode escape sequences common in inline JSON/JS (e.g. \u003e -> >)
+    sanitized_html = re.sub(
+        r"\\u([0-9a-fA-F]{4})",
+        lambda m: chr(int(m.group(1), 16)),
+        html,
+    )
+    import html as html_module
+    sanitized_html = html_module.unescape(sanitized_html)
+
+    soup = BeautifulSoup(sanitized_html, "lxml")
     collected: set[str] = set()
 
     # Strategy 1: mailto: links.
@@ -98,20 +115,22 @@ def extract_emails_from_html(html: str) -> list[str]:
             raw = unquote(raw).strip()
             emails = _EMAIL_PATTERN.findall(raw)
             for email in emails:
-                if _is_valid_email(email):
-                    collected.add(_normalize_email(email))
+                norm = _normalize_email(email)
+                if _is_valid_email(norm):
+                    collected.add(norm)
 
     # Strategy 2: regex scan of all text nodes.
-    # We use the raw HTML rather than parsed text to catch obfuscated patterns.
     text_content = soup.get_text(" ")
     for email in _EMAIL_PATTERN.findall(text_content):
-        if _is_valid_email(email):
-            collected.add(_normalize_email(email))
+        norm = _normalize_email(email)
+        if _is_valid_email(norm):
+            collected.add(norm)
 
-    # Also scan raw HTML for mailto: occurrences that BeautifulSoup might miss.
-    for email in _EMAIL_PATTERN.findall(html):
-        if _is_valid_email(email):
-            collected.add(_normalize_email(email))
+    # Also scan sanitized HTML for mailto: or plain occurrences that BS4 might miss.
+    for email in _EMAIL_PATTERN.findall(sanitized_html):
+        norm = _normalize_email(email)
+        if _is_valid_email(norm):
+            collected.add(norm)
 
     return sorted(collected)
 

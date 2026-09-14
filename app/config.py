@@ -36,6 +36,10 @@ class Settings(BaseSettings):
         default="",
         description="OpenAI API key (read from .env or OPENAI_API_KEY environment variable)",
     )
+    openai_base_url: str | None = Field(
+        default=None,
+        description="Custom base URL for OpenAI-compatible providers (Groq, OpenRouter, Gemini, etc.)",
+    )
 
     # ------------------------------------------------------------------ #
     # OpenAI

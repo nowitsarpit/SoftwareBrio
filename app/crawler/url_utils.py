@@ -80,8 +80,13 @@ def normalize_domain(raw: str) -> str:
 
 
 def build_base_url(domain: str) -> str:
-    """Return the HTTPS homepage URL for a normalised domain."""
-    return f"https://{domain}"
+    """Return the canonical HTTPS homepage URL with trailing slash for a normalised domain."""
+    return f"https://{domain}/"
+
+
+def is_homepage_url(url: str, base_url: str) -> bool:
+    """Return True if url resolves to the root/homepage of base_url."""
+    return url.rstrip("/") == base_url.rstrip("/")
 
 
 def normalize_url(url: str, base_url: str) -> str | None:
