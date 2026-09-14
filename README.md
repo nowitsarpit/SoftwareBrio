@@ -2,14 +2,7 @@
 
 > **Production-grade, modular Python pipeline that autonomously crawls company websites, extracts structured business intelligence using an LLM, validates data with strict Pydantic schemas, and outputs clean lead intelligence.** Fully automated with zero hardcoded company rules.
 
-[![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-blue.svg?logo=python&logoColor=white)](https://www.python.org/)
-[![Pydantic v2](https://img.shields.io/badge/Pydantic-v2-e92063.svg?logo=pydantic&logoColor=white)](https://docs.pydantic.dev/)
-[![Playwright](https://img.shields.io/badge/Playwright-Chromium-45ba4b.svg?logo=playwright&logoColor=white)](https://playwright.dev/)
-[![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o--mini-412991.svg?logo=openai&logoColor=white)](https://platform.openai.com/)
-[![CI Pipeline](https://github.com/nowitsarpit/SoftwareBrio/actions/workflows/ci.yml/badge.svg)](https://github.com/nowitsarpit/SoftwareBrio/actions)
-[![Tests](https://img.shields.io/badge/Tests-106%20Passing-brightgreen.svg)]()
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ed.svg?logo=docker&logoColor=white)](Dockerfile)
-[![Code Style](https://img.shields.io/badge/Code%20Style-Black%20%2F%20Ruff-000000.svg)]()
+
 
 ---
 
